@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="css/style.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <title>cats for adoption</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">CATS FOR ADOPTION</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="index.html">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="adopt.html">Adopt A Cat</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      
+    <div class="container">
+      <h2 class="text-center title">Cats up for adoption</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Picture</th>
+            <th scope="col">Name</th>
+            <th scope="col">Gender</th>
+            <th scope="col">Color</th>
+            <th scope="col">Breed</th>
+            <th scope="col">Age</th>
+          </tr>
+        </thead>
+        <tbody id="adoption-table">
+        </tbody>
+      </table>
+      <h2 class="text-center title">Is there a cat looking for a new home?</h2>
+      <form class="needs-validation" id="upload-form" novalidate>
+        <div class="mb-3">
+          <label for="validationCustom01">Name</label>
+          <input type="text" class="form-control" id="validationCustom01" placeholder="Name" required>
+          <div class="invalid-feedback">invalid name</div>
+        </div>
+        <div class="mb-3">
+          <label for="validationCustom02">Color</label>
+          <input type="text" class="form-control" id="validationCustom02" placeholder="Color" required>
+          <div class="invalid-feedback">invalid color</div>
+        </div>
+        <div class="mb-3">
+          <label for="validationCustom03">Age</label>
+          <input type="number" class="form-control" id="validationCustom03" placeholder="Age" required>
+          <div class="invalid-feedback">invalid age</div>
+        </div>
+        <div class="form-group">
+          <label for="gender-select">Gender</label>
+          <select class="custom-select" id="gender-select" required>
+            <option value="">Select gender</option>
+            <option value="1">Male</option>
+            <option value="2">Female</option>
+          </select>
+          <div class="invalid-feedback">invalid gender</div>
+        </div>
+        <div class="form-group">
+          <label for="breed-select">Breed</label>
+          <select class="custom-select" id="breed-select" required>
+            <option value="">Select breed</option>
+          </select>
+          <div class="invalid-feedback">invalid breed</div>
+        </div>
+      
+        <div class="custom-file">
+          <input type="file" class="custom-file-input" id="validatedCustomFile" required>
+          <label class="custom-file-label" for="validatedCustomFile">Choose picture...</label>
+          <div class="invalid-feedback">invalid file</div>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit form</button>
+      </form>
+      
+      </div>
+    <div class="modal fade" id="gallery-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+            <img src="" class="modal-img" alt="modal img">
+            </div>
+        </div>
+        </div>
+    </div>
+    <hr>
+<p>Request Status:</p>
+<div id="status"></div>
+<hr>
+<p>API Response:</p>
+<div id="response"></div>
+
+
+    <!-- Bootstrap js -->
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script>
+        var dict= {"1":"Male", "2":"Female"}
+        var api_key = "e6d17f2c-086f-4d52-aa65-a59e929d0602";
+
+
+        (function() {
+          'use strict';
+          window.addEventListener('load', function() {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function(form) {
+              form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+                else{
+                  onUploadBtnClick(event)
+                }
+                form.classList.add('was-validated');
+              }, false);
+            });
+          }, false);
+        })();
+        document.addEventListener("click",function (e){
+            if(e.target.classList.contains("cat-pic")){
+                const src = e.target.getAttribute("src");
+                document.querySelector(".modal-img").src = src;
+                const myModal = new bootstrap.Modal(document.getElementById('gallery-modal'));
+                myModal.show();
+                }
+            })
+        var myFormData = new FormData();
+
+        function onUploadBtnClick(e)
+        {
+          var valid_forms = document.getElementsByClassName('was-validated');
+            // ----- Cats
+            var api_url = "https://api.thecatapi.com/v1/images/upload"
+            
+            // ---- Dogs
+            //var api_url = "https://api.thecatapi.com/v1/images/upload"
+            //var api_key = "DEMO-API-KEY"
+            
+            e.preventDefault();
+            // get the inputted
+            var file_input = document.getElementById("validatedCustomFile");
+            var sub_id_input = "catwebsite-for-ta-assignment-batbat";
+            var breed_input = document.getElementById("breed-select");
+            var name_input = document.getElementById("validationCustom01");
+            var color_input = document.getElementById("validationCustom02");
+            var gender_input = document.getElementById("gender-select");
+            var age_input = document.getElementById("validationCustom03");
+            var extention = file_input.files[0].name.split('.').pop();
+            // add them to the FormData object
+            myFormData.append('file', file_input.files[0], name_input.value+"/"+color_input.value+"/"+gender_input.value+"/"+validationCustom03.value+"."+extention);
+            myFormData.append('sub_id', sub_id_input);
+            myFormData.append('breed_ids', breed_input.value);
+
+            var xmlhttp = new XMLHttpRequest;
+            
+            xmlhttp.onreadystatechange = function() {
+              if(xmlhttp.status==201)
+              {
+                updateResponseOutput("Success: "+xmlhttp.responseText);
+              }else if(xmlhttp.status==400)
+              {
+                updateResponseOutput("Error: " +xmlhttp.responseText);
+              }else{
+                updateResponseOutput(xmlhttp.responseText);
+              }
+                
+            };
+            xmlhttp.onload = function () {
+              updateStatusOutput("Uploaded");
+            };
+            
+            xmlhttp.open('POST', api_url, true);
+                
+            // add your API key to the request header - this is needed to authorise an upload
+            xmlhttp.setRequestHeader('x-api-key',api_key);
+            xmlhttp.send(myFormData);
+            updateStatusOutput("Uploading...");
+        }
+
+        function updateStatusOutput(msg)
+        {
+            document.getElementById("status").innerHTML = msg;
+        }
+
+        function updateResponseOutput(msg)
+        {
+            document.getElementById("response").innerHTML = msg;
+        }
+
+        var settings = {
+          "async": true,
+          "crossDomain": true,
+          "url": "https://api.thecatapi.com/v1/breeds?attach_breed=0",
+          "method": "GET",
+          "headers": {
+            "x-api-key": api_key
+          }
+        }
+
+        $.ajax(settings).done(function (response) {
+          let result = response.map(({name,id}) => ({name,id}))
+          result.forEach(element => {
+            document.getElementById("breed-select").innerHTML += '<option value="'+element.id+'">'+element.name+'</option>'
+          });
+        });
+
+        var settings = {
+          "async": true,
+          "crossDomain": true,
+          "url": "https://api.thecatapi.com/v1/images?limit=15&page=0&sub_id=catwebsite-for-ta-assignment-batbat",
+          "method": "GET",
+          "headers": {
+            "x-api-key": api_key
+          }
+        }
+
+        table = document.getElementById("adoption-table");
+
+        $.ajax(settings).done(function (response) {
+          response.forEach(element => {
+            received_file_name = element.original_filename;
+            image_url = element.url;
+            breed = element.breeds[0].name;
+            proprties = received_file_name.split(".")[0].split("/");
+            name = proprties[0];
+            color = proprties[1];
+            gender = dict[proprties[2]];
+            age = proprties[3];
+            table.innerHTML+=    '<tr><td><img src="'+image_url+'" class="cat-pic"></td><td>'+name+'</td><td>'+gender+'</td><td>'+color+'</td><td>'+breed+'</td><td>'+age+'</td></tr>'
+            console.log(name,color,gender,breed)
+          });
+        });
+    </script>
+  </body>
+</html>
